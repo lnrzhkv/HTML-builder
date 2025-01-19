@@ -7,12 +7,12 @@
     "format": "prettier --write .",
     "ci:format": "prettier --check ."
   },
-  "author": "evgeniimal",
+  "author": "Alina Rozhkova",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/EvgeniiMal/html-builder-black/issues"
+    "url": "https://github.com/lnrzhkv/HTML-builder/issues"
   },
-  "homepage": "https://github.com/EvgeniiMal/html-builder-black#readme",
+  "homepage": "https://github.com/lnrzhkv/HTML-builder#readme",
   "devDependencies": {
     "@types/node": "^18.16.6",
     "eslint": "^8.40.0",
