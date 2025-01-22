@@ -80,31 +80,49 @@ const ABOUT_FILE_DIR = path.join(COMPONENTS_DIR, 'about.html');
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
 const OUTPUT_HTML_PATH = path.join(OUTPUT_DIR, 'index.html');
 
+async function checkFileExists(filePath) {
+  try {
+    await fsPromises.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const getSafelyFile = async (filePath) => {
+  return (await checkFileExists(filePath))
+    ? fsPromises.readFile(filePath, FORMAT)
+    : () => {};
+};
 const injectHTML = async () => {
   const dirtHTML = await fsPromises.readFile(TEMPLATE_PATH, FORMAT);
-
-  const header = await fsPromises.readFile(HEADER_FILE_DIR, FORMAT);
-  const articles = await fsPromises.readFile(ACTICLE_FILE_DIR, FORMAT);
-  const footer = await fsPromises.readFile(FOOTER_FILE_DIR, FORMAT);
-  const about = await fsPromises.readFile(ABOUT_FILE_DIR, FORMAT);
-
-  const doReplace = (origin, template, replacer) => {
-    if (!replacer) return template;
-
-    return origin.replace(template, replacer);
-  };
-
-  const templates = [
-    { template: '{{header}}', content: header },
-    { template: '{{articles}}', content: articles },
-    { template: '{{footer}}', content: footer },
-    { template: '{{about}}', content: about },
-  ];
-
   let finalHTML = dirtHTML;
 
-  templates.forEach(({ template, content }) => {
-    finalHTML = doReplace(finalHTML, template, content);
+  await Promise.all([
+    getSafelyFile(HEADER_FILE_DIR),
+    getSafelyFile(ACTICLE_FILE_DIR),
+    getSafelyFile(FOOTER_FILE_DIR),
+    getSafelyFile(ABOUT_FILE_DIR),
+  ]).then((data) => {
+    const [headerContent, articleContent, footerContent, aboutContent] =
+      data.filter((content) => typeof content === 'string');
+
+    if (headerContent) {
+      finalHTML = finalHTML.replace('{{header}}', headerContent);
+    }
+
+    if (articleContent) {
+      finalHTML = finalHTML.replace('{{articles}}', articleContent);
+    }
+
+    if (footerContent) {
+      finalHTML = finalHTML.replace('{{footer}}', footerContent);
+    }
+
+    if (aboutContent) {
+      finalHTML = finalHTML.replace('{{about}}', aboutContent);
+    }
+    return Promise.resolve(true);
   });
 
   await fsPromises.writeFile(OUTPUT_HTML_PATH, finalHTML, FORMAT);
