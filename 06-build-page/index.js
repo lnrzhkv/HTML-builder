@@ -75,21 +75,37 @@ const COMPONENTS_DIR = path.join(__dirname, 'components');
 const HEADER_FILE_DIR = path.join(COMPONENTS_DIR, 'header.html');
 const ACTICLE_FILE_DIR = path.join(COMPONENTS_DIR, 'articles.html');
 const FOOTER_FILE_DIR = path.join(COMPONENTS_DIR, 'footer.html');
+const ABOUT_FILE_DIR = path.join(COMPONENTS_DIR, 'about.html');
 
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
 const OUTPUT_HTML_PATH = path.join(OUTPUT_DIR, 'index.html');
 
 const injectHTML = async () => {
-  const template = await fsPromises.readFile(TEMPLATE_PATH, FORMAT);
+  const dirtHTML = await fsPromises.readFile(TEMPLATE_PATH, FORMAT);
 
   const header = await fsPromises.readFile(HEADER_FILE_DIR, FORMAT);
   const articles = await fsPromises.readFile(ACTICLE_FILE_DIR, FORMAT);
   const footer = await fsPromises.readFile(FOOTER_FILE_DIR, FORMAT);
+  const about = await fsPromises.readFile(ABOUT_FILE_DIR, FORMAT);
 
-  let finalHTML = template
-    .replace('{{header}}', header)
-    .replace('{{articles}}', articles)
-    .replace('{{footer}}', footer);
+  const doReplace = (origin, template, replacer) => {
+    if (!replacer) return template;
+
+    return origin.replace(template, replacer);
+  };
+
+  const templates = [
+    { template: '{{header}}', content: header },
+    { template: '{{articles}}', content: articles },
+    { template: '{{footer}}', content: footer },
+    { template: '{{about}}', content: about },
+  ];
+
+  let finalHTML = dirtHTML;
+
+  templates.forEach(({ template, content }) => {
+    finalHTML = doReplace(finalHTML, template, content);
+  });
 
   await fsPromises.writeFile(OUTPUT_HTML_PATH, finalHTML, FORMAT);
 };
