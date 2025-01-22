@@ -28,10 +28,6 @@ rl.question(HELLO_PHRASE, (answer) => {
     stream.write(line + '\n');
     execInterrupt(line);
   });
-
-  rl.on('history', (data) => {
-    console.log(data);
-  });
 });
 
 process.on('exit', () => {
