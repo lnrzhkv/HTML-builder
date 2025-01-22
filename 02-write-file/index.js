@@ -14,15 +14,23 @@ const rl = readline.createInterface({
 const HELLO_PHRASE = 'Hello!!! Write your text here please: ';
 const GOODBYE_PHRASE = 'Goodbye! Have a great day!';
 
+const execInterrupt = (message) => {
+  if (message.trim().toLowerCase() === 'exit') {
+    process.exit();
+  }
+};
 rl.question(HELLO_PHRASE, (answer) => {
   stream.write(answer + '\n');
 
+  execInterrupt(answer);
+
   rl.on('line', (line) => {
     stream.write(line + '\n');
+    execInterrupt(line);
+  });
 
-    if (line.trim().toLowerCase() === 'exit') {
-      process.exit();
-    }
+  rl.on('history', (data) => {
+    console.log(data);
   });
 });
 
