@@ -2,6 +2,21 @@ const fsPromises = require('fs').promises;
 const path = require('path');
 const { mkdir, copyFile } = require('node:fs/promises');
 
+const copyDirRecursive = async (src, dest) => {
+  await mkdir(dest, { recursive: true });
+
+  const items = await fsPromises.readdir(src, { withFileTypes: true });
+
+  for (const item of items) {
+    const fromPath = path.join(src, item.name);
+    const toPath = path.join(dest, item.name);
+
+    item.isDirectory()
+      ? await copyDirRecursive(fromPath, toPath)
+      : await copyFile(fromPath, toPath);
+  }
+};
+
 // Global constants
 const DIST_DIR_NAME = 'project-dist';
 const OUTPUT_DIR = path.join(__dirname, DIST_DIR_NAME);
@@ -65,7 +80,7 @@ const copyAssets = async () => {
     if (file.isFile()) {
       await copyFile(fileDir, destination);
     } else if (file.isDirectory()) {
-      await fsPromises.cp(fileDir, destination, { recursive: true });
+      await copyDirRecursive(fileDir, destination);
     }
   }
 };
